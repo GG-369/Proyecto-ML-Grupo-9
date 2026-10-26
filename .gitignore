@@ -1,0 +1,21 @@
+# Datos y credenciales (nunca subir)
+/data/raw/
+/data/processed/
+/data/cache/
+*.csv.gz
+*.parquet
+kaggle.json
+.env
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+# Salidas generadas grandes/locales
+/outputs/audit_*.json
+/outputs/metrics_validacion_*.json
+/data/splits/
+/outputs/predictions_*.csv
+/outputs/metrics_validacion_v4.json
