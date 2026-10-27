@@ -1,0 +1,96 @@
+{
+  "contract_id": "lc_36m_2007_2015h1_v4",
+  "train_n": 244943,
+  "valid_n": 90615,
+  "seed": 42,
+  "n_search_configs": 30,
+  "inner_validation": "fit issue_d < 2013-07-01, score el resto de train",
+  "versions": {
+    "python": "3.14.8",
+    "sklearn": "1.9.0",
+    "pandas": "3.0.4",
+    "numpy": "2.5.3"
+  },
+  "results": {
+    "hgb_g1": {
+      "params": {
+        "learning_rate": 0.03278043168454925,
+        "max_leaf_nodes": 15,
+        "max_depth": 4,
+        "min_samples_leaf": 500,
+        "l2_regularization": 10.0,
+        "class_weight": null,
+        "max_iter": 490
+      },
+      "inner_roc_auc": 0.6509226203842238,
+      "roc_auc": 0.666573544825869,
+      "pr_auc": 0.23294396494499434,
+      "f1": 0.0,
+      "accuracy": 0.8587209623130828,
+      "precision": 0.0,
+      "recall": 0.0,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          77813,
+          2
+        ],
+        [
+          12800,
+          0
+        ]
+      ],
+      "positive_rate": 0.141256966285935,
+      "target_prevalence": 0.141256966285935,
+      "predicted_positive_rate": 2.2071400982177342e-05,
+      "n": 90615,
+      "top_decile": {
+        "frac": 0.1,
+        "k": 9062,
+        "capture": 0.19828125,
+        "lift": 1.982703097412271
+      },
+      "fit_seconds": 3.0
+    },
+    "hgb_g1_g2": {
+      "params": {
+        "learning_rate": 0.022873505997589794,
+        "max_leaf_nodes": 8,
+        "max_depth": 8,
+        "min_samples_leaf": 50,
+        "l2_regularization": 10.0,
+        "class_weight": null,
+        "max_iter": 500
+      },
+      "inner_roc_auc": 0.6667321787646381,
+      "roc_auc": 0.6852745012208442,
+      "pr_auc": 0.2511678383856569,
+      "f1": 0.0,
+      "accuracy": 0.858743033714065,
+      "precision": 0.0,
+      "recall": 0.0,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          77815,
+          0
+        ],
+        [
+          12800,
+          0
+        ]
+      ],
+      "positive_rate": 0.141256966285935,
+      "target_prevalence": 0.141256966285935,
+      "predicted_positive_rate": 0.0,
+      "n": 90615,
+      "top_decile": {
+        "frac": 0.1,
+        "k": 9062,
+        "capture": 0.212265625,
+        "lift": 2.1225391314693223
+      },
+      "fit_seconds": 3.1
+    }
+  }
+}
