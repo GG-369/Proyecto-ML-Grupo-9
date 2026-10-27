@@ -1,0 +1,120 @@
+{
+  "contract_id": "lc_36m_2007_2015h1_v4",
+  "evaluation_split": "valid_2014h2",
+  "valid_n": 90615,
+  "cohorts": {
+    "full_2007_2014h1": {
+      "train_n": 244943,
+      "models": {
+        "logreg_g1": {
+          "roc_auc": 0.6548376678660927,
+          "pr_auc": 0.22308841943148217,
+          "f1": 0.304249477664773,
+          "accuracy": 0.5553385201125641,
+          "precision": 0.19528738944428436,
+          "recall": 0.68828125,
+          "threshold": 0.5,
+          "confusion_matrix": [
+            [
+              41512,
+              36303
+            ],
+            [
+              3990,
+              8810
+            ]
+          ],
+          "positive_rate": 0.141256966285935,
+          "target_prevalence": 0.141256966285935,
+          "predicted_positive_rate": 0.49785355625448324,
+          "n": 90615
+        },
+        "logreg_g1_g2": {
+          "roc_auc": 0.6793581672074792,
+          "pr_auc": 0.2449692648832045,
+          "f1": 0.321714501510574,
+          "accuracy": 0.6035755669591127,
+          "precision": 0.21212649402390438,
+          "recall": 0.665546875,
+          "threshold": 0.5,
+          "confusion_matrix": [
+            [
+              46174,
+              31641
+            ],
+            [
+              4281,
+              8519
+            ]
+          ],
+          "positive_rate": 0.141256966285935,
+          "target_prevalence": 0.141256966285935,
+          "predicted_positive_rate": 0.44319373172212106,
+          "n": 90615
+        }
+      }
+    },
+    "recent_2012_2014h1": {
+      "train_n": 215847,
+      "models": {
+        "logreg_g1": {
+          "roc_auc": 0.6559025342559275,
+          "pr_auc": 0.22377368725802915,
+          "f1": 0.3060267306132525,
+          "accuracy": 0.5656569000717321,
+          "precision": 0.1976135173293255,
+          "recall": 0.67796875,
+          "threshold": 0.5,
+          "confusion_matrix": [
+            [
+              42579,
+              35236
+            ],
+            [
+              4122,
+              8678
+            ]
+          ],
+          "positive_rate": 0.141256966285935,
+          "target_prevalence": 0.141256966285935,
+          "predicted_positive_rate": 0.48462175136566793,
+          "n": 90615
+        },
+        "logreg_g1_g2": {
+          "roc_auc": 0.6808857014634069,
+          "pr_auc": 0.2471358420552069,
+          "f1": 0.3234129318119437,
+          "accuracy": 0.61915797605253,
+          "precision": 0.21588232214835365,
+          "recall": 0.644375,
+          "threshold": 0.5,
+          "confusion_matrix": [
+            [
+              47857,
+              29958
+            ],
+            [
+              4552,
+              8248
+            ]
+          ],
+          "positive_rate": 0.141256966285935,
+          "target_prevalence": 0.141256966285935,
+          "predicted_positive_rate": 0.4216299729625338,
+          "n": 90615
+        }
+      }
+    }
+  },
+  "comparison": {
+    "logreg_g1": {
+      "delta_roc_auc_full_minus_recent": -0.0010648663898348287,
+      "delta_pr_auc_full_minus_recent": -0.0006852678265469869
+    },
+    "logreg_g1_g2": {
+      "delta_roc_auc_full_minus_recent": -0.001527534255927665,
+      "delta_pr_auc_full_minus_recent": -0.0021665771720023874
+    }
+  },
+  "note": "Selección SOLO en validación; ninguna prueba sobre test. Comparación de políticas, no efecto causal de la antigüedad."
+}

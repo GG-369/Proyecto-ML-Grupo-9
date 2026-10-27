@@ -1,0 +1,89 @@
+{
+  "contract_id": "lc_36m_2007_2015h1_v4",
+  "train_n": 244943,
+  "valid_n": 90615,
+  "seed": 42,
+  "inner_validation": "fit issue_d < 2013-07-01, score el resto de train; selección por ROC-AUC",
+  "versions": {
+    "python": "3.14.7",
+    "sklearn": "1.9.1",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4"
+  },
+  "results": {
+    "decision_tree_g1": {
+      "params": {
+        "max_depth": 12,
+        "min_samples_leaf": 500,
+        "class_weight": "balanced"
+      },
+      "inner_roc_auc": 0.6198044257068027,
+      "roc_auc": 0.6323309873578359,
+      "pr_auc": 0.208444656555797,
+      "f1": 0.2927404067831344,
+      "accuracy": 0.5429564641615626,
+      "precision": 0.18731560198439584,
+      "recall": 0.669609375,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          40629,
+          37186
+        ],
+        [
+          4229,
+          8571
+        ]
+      ],
+      "positive_rate": 0.141256966285935,
+      "target_prevalence": 0.141256966285935,
+      "predicted_positive_rate": 0.5049605473707444,
+      "n": 90615,
+      "top_decile": {
+        "fraction": 0.1,
+        "n_selected": 9062,
+        "positives_captured": 2271,
+        "capture": 0.177421875
+      },
+      "fit_seconds": 12.1
+    },
+    "random_forest_g1": {
+      "params": {
+        "n_estimators": 200,
+        "max_depth": null,
+        "min_samples_leaf": 100,
+        "max_features": "sqrt",
+        "class_weight": "balanced_subsample"
+      },
+      "inner_roc_auc": 0.6487654183220737,
+      "roc_auc": 0.6559817224747799,
+      "pr_auc": 0.22381601056275585,
+      "f1": 0.3073045875172278,
+      "accuracy": 0.6117419853225183,
+      "precision": 0.2054224795998947,
+      "recall": 0.6096875,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          47629,
+          30186
+        ],
+        [
+          4996,
+          7804
+        ]
+      ],
+      "positive_rate": 0.141256966285935,
+      "target_prevalence": 0.141256966285935,
+      "predicted_positive_rate": 0.4192462616564586,
+      "n": 90615,
+      "top_decile": {
+        "fraction": 0.1,
+        "n_selected": 9062,
+        "positives_captured": 2422,
+        "capture": 0.18921875
+      },
+      "fit_seconds": 28.0
+    }
+  }
+}

@@ -25,3 +25,52 @@ Toda la fundamentación teórica, estructuración de variables, métricas y plan
 ## Referencias
 - Dataset: Lending Club Loan Data, vía Kaggle (`wordsforthewise/lending-club`).
 - Curso de Machine Learning, UTEC (2026).
+
+---
+
+## Avance 2 en preparación (sin alterar Avance 1)
+
+El notebook inicial y `outputs/metrics_baseline.json` se conservan íntegros.
+Se preparó una estructura mínima en `src/`, `scripts/` y `tests/`; todavía **no
+se ha reentrenado con el CSV completo**.
+
+### Inicio en VS Code, PowerShell (desde la raíz del repositorio)
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pip install pytest
+python -m pytest -q
+```
+
+Si PowerShell bloquea la activación, ejecutar directamente
+`.\.venv\Scripts\python.exe -m pytest -q`.
+
+Descargar el archivo desde Kaggle en `data/raw/accepted_2007_to_2018Q4.csv.gz`
+(ver [`data/README.md`](data/README.md)). Nunca subir `kaggle.json`.
+
+```powershell
+# 1. Recuento de todos los registros, por estado y año (NO muestrea)
+python -m scripts.audit_dataset
+
+# 2. Reproducir cohorte histórica; archivos parquet por fragmentos
+python -m scripts.prepare_data --mode legacy
+
+# 3. Reentrenar baseline en validación (NO toca test)
+python -m scripts.train_baseline
+```
+
+**Antes de escoger cohorte final:** contrastar `legacy`, `matured`, `matured_36`
+con `outputs/audit_lending_club.json`. El modo `all_final` se cuenta en la
+auditoría, pero se bloquea para preparación porque puede introducir sesgo de
+censura en préstamos recientes. `matured` es una hipótesis de observación
+basada en 2018Q4 + 6 meses, no una garantía de seguimiento completo.
+
+**Test final pendiente:** la ventana 2014H2 prometida en `proposal.md` no se
+incluye en `legacy`. No definirla ni evaluar sobre ella sin validar primero
+las cohortes elegibles y fijar un protocolo temporal de tres conjuntos.
+
+- Auditoría de código: [`reports/auditoria_codigo.md`](reports/auditoria_codigo.md)
+- Premortem: [`reports/premortem.md`](reports/premortem.md)
+- Asignación paralela: [`reports/plan_equipo.md`](reports/plan_equipo.md)
