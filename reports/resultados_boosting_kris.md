@@ -9,6 +9,7 @@ Contrato de datos: `lc_36m_2007_2015h1_v4`. Todos los números de este informe s
 - El ranking de ambos modelos es muy parecido: el 63% (G1) y el 71% (G1+G2) de los préstamos del 10% más riesgoso coinciden.
 - Con umbral 0.5 el boosting casi no marca préstamos riesgosos (F1 = 0). No es un fallo: es consecuencia de no usar `class_weight='balanced'` en las configuraciones ganadoras (sección 8).
 - El modelo sigue sin estar listo para decisiones crediticias reales.
+- `GradientBoostingClassifier` clásico, con una sola configuración fija y sin búsqueda, queda algo por debajo de HGB en ambos grupos de variables y tarda entre 35 y 40 veces más en entrenarse (sección 9). No es una comparación justa de algoritmos, solo del presupuesto de ajuste usado en cada uno.
 
 ## 2. Qué se hizo
 
@@ -110,7 +111,22 @@ Matrices de confusión de HGB (filas = real 0/1, columnas = predicho 0/1): G1 `[
 
 Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalencia (14%): media 0.132 en G1 y 0.126 en G1+G2, percentil 99 en 0.32 y máximo 0.516 y 0.440, por lo que casi ninguna llega a 0.5. **Esos F1 y recall no son comparables** con los de la regresión logística, que usa `class_weight='balanced'`. La accuracy (0.8587) coincide con la del Dummy y no informa nada. Para comparar de forma justa se usan ROC-AUC, PR-AUC y la tabla de la sección 5.
 
-## 9. Limitaciones
+## 9. GradientBoosting clásico (comparación adicional)
+
+Se ejecutó `GradientBoostingClassifier` de scikit-learn con hiperparámetros fijos (`n_estimators=200, learning_rate=0.1, max_depth=3, subsample=0.8`), **sin búsqueda de hiperparámetros** (a diferencia del HGB, que sí pasó por la subvalidación de la sección 3). Mismo pipeline, mismas variables G1 y G1+G2, misma validación congelada.
+
+| Variables | Modelo | ROC-AUC | PR-AUC | Captura top-10% | Tiempo de ajuste |
+|---|---|---:|---:|---:|---:|
+| G1 | HGB (con búsqueda) | **0.6666** | **0.2329** | 0.198 | 4.1 s |
+| G1 | GradientBoosting clásico (sin búsqueda) | 0.6633 | 0.2301 | 0.197 | 151.2 s |
+| G1+G2 | HGB (con búsqueda) | **0.6853** | **0.2512** | 0.212 | 4.3 s |
+| G1+G2 | GradientBoosting clásico (sin búsqueda) | 0.6826 | 0.2444 | 0.209 | 172.5 s |
+
+HGB queda ligeramente por encima del GradientBoosting clásico en ambos grupos de variables, pero la comparación **no es justa**: HGB tuvo 30 configuraciones de búsqueda con subvalidación temporal y el clásico usó una sola configuración arbitraria. No se puede concluir que HGB sea mejor algoritmo; solo que, con este presupuesto de ajuste, rindió algo mejor y fue entre 35 y 40 veces más rápido de entrenar (4 s contra 150–170 s por corrida), lo que en la práctica también facilitó hacer la búsqueda de 30 configuraciones que sí se le hizo a HGB.
+
+Con umbral 0.5, el GradientBoosting clásico sí marca algunos préstamos como riesgosos (a diferencia de HGB, que no marca ninguno): precisión 0.293/recall 0.0009 en G1 y precisión 0.341/recall 0.0033 en G1+G2 (F1 de 0.0019 y 0.0065 respectivamente). Siguen siendo recalls prácticamente nulos e inútiles para decisiones reales; no se usó `class_weight` en ninguno de los dos modelos clásicos.
+
+## 10. Limitaciones
 
 1. Una sola semilla (42) y una sola partición temporal; sin intervalos que incluyan la variabilidad de entrenamiento.
 2. La elección de hiperparámetros no es concluyente: las configuraciones de cabeza empatan en la subvalidación (sección 3). El tope de 500 iteraciones pudo limitar el resultado.
@@ -119,17 +135,17 @@ Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalenci
 5. Los resultados con G1+G2 incorporan la evaluación crediticia previa de Lending Club (`grade`, `int_rate`), por lo que no son equivalentes a los de G1.
 6. No se analizaron errores por segmento ni posibles sesgos; eso corresponde a Rubí.
 
-## 10. Reproducibilidad
+## 11. Reproducibilidad
 
 ```bash
-python -m scripts.train_boosting_kris --n-iter 30
+python -m scripts.train_boosting_kris --n-iter 30 --with-gb
 ```
 
 Semilla 42; Python 3.14.8, scikit-learn 1.9.0, pandas 3.0.4, numpy 2.5.3. Salidas en `outputs/`: `metrics_boosting_kris_v4.json`, `predictions_valid_boosting_kris.csv`, `search_boosting_kris_g1.csv`, `search_boosting_kris_g1_g2.csv`. Las comparaciones de las secciones 5 a 7 se calcularon aparte con `predictions_valid_v4.csv` y `predictions_valid_boosting_kris.csv`, unidos por `id` (relación 1:1, 90,615 filas, mismo `target`); ese cálculo no está en el repositorio.
 
-## 11. Pendiente / no ejecutado
+## 12. Pendiente / no ejecutado
 
-- `GradientBoosting` clásico (`--with-gb`): **no se ejecutó**.
 - Corridas con otras semillas y búsqueda con un tope de iteraciones mayor a 500: **no se hicieron**.
 - Importancia de variables: **no calculada**.
+- Búsqueda de hiperparámetros para `GradientBoosting` clásico (sección 9 usó una sola configuración fija, sin subvalidación): **no se hizo**; no es comparable 1 a 1 con el proceso de HGB.
 - Evaluación sobre el test reservado: **no realizada**; se hará una sola vez al final, con el modelo ya elegido por el equipo.
