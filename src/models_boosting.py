@@ -77,16 +77,27 @@ def make_gb_classic(include_g2=False, **params):
 
 def sample_configs(n, seed=RANDOM_STATE):
     """Búsqueda aleatoria reproducible. `max_iter` NO se busca: se elige el
-    mejor número de iteraciones con staged_predict_proba en la subvalidación."""
+    mejor número de iteraciones con staged_predict_proba en la subvalidación.
+
+    Espacio ampliado (ver `reports/resultados_boosting_kris.md`, sección 3):
+    las búsquedas anteriores (30 configs, semilla 42) dieron ganadoras en los
+    bordes de `l2_regularization` (10.0, el máximo) y, en G1, de
+    `min_samples_leaf` (500, el máximo); `learning_rate` ganó cerca del
+    extremo bajo (~0.023-0.033 sobre un rango de 0.02-0.2). Se ensancharon
+    esos tres ejes. `max_leaf_nodes` y `max_depth` NO se tocaron: la
+    ganadora de G1+G2 usó `max_depth=8` con solo 8 hojas, es decir la
+    profundidad no estaba restringiendo nada en la práctica, así que
+    ampliarlos sería ruido sin justificación empírica.
+    """
     rng = np.random.default_rng(seed)
     configs = []
     for _ in range(n):
         configs.append({
-            'learning_rate': float(np.exp(rng.uniform(np.log(0.02), np.log(0.2)))),
+            'learning_rate': float(np.exp(rng.uniform(np.log(0.01), np.log(0.2)))),
             'max_leaf_nodes': int(rng.choice([8, 15, 31, 63])),
             'max_depth': [None, 4, 6, 8][int(rng.integers(4))],
-            'min_samples_leaf': int(rng.choice([20, 50, 100, 200, 500])),
-            'l2_regularization': float(rng.choice([0.0, 0.1, 1.0, 10.0])),
+            'min_samples_leaf': int(rng.choice([20, 50, 100, 200, 500, 1000])),
+            'l2_regularization': float(rng.choice([0.0, 0.1, 1.0, 10.0, 30.0, 100.0])),
             'class_weight': [None, 'balanced'][int(rng.integers(2))],
         })
     return configs
