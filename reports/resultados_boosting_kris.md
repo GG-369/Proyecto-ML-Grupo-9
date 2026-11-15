@@ -4,12 +4,13 @@ Contrato de datos: `lc_36m_2007_2015h1_v4`. Todos los números de este informe s
 
 ## 1. Resumen
 
-- `HistGradientBoostingClassifier` supera a la regresión logística de Valentino en ROC-AUC y PR-AUC con ambos grupos de variables, pero **la mejora es pequeña**: +0.0117 ROC-AUC con G1 y +0.0059 con G1+G2.
+- `HistGradientBoostingClassifier` supera a la regresión logística de Valentino en ROC-AUC y PR-AUC con ambos grupos de variables, pero **la mejora es pequeña**: +0.0117 ROC-AUC con G1 y +0.0060 con G1+G2.
 - En un bootstrap pareado sobre las filas de validación, el intervalo del 95% de la diferencia queda por encima de cero en las cuatro comparaciones (sección 6). Ese intervalo solo recoge la variabilidad del conjunto de validación, no la de la semilla ni la del período.
 - El ranking de ambos modelos es muy parecido: el 63% (G1) y el 71% (G1+G2) de los préstamos del 10% más riesgoso coinciden.
 - Con umbral 0.5 el boosting casi no marca préstamos riesgosos (F1 = 0). No es un fallo: es consecuencia de no usar `class_weight='balanced'` en las configuraciones ganadoras (sección 8).
 - El modelo sigue sin estar listo para decisiones crediticias reales.
 - `GradientBoostingClassifier` clásico, con una sola configuración fija y sin búsqueda, queda algo por debajo de HGB en ambos grupos de variables y tarda entre 35 y 40 veces más en entrenarse (sección 9). No es una comparación justa de algoritmos, solo del presupuesto de ajuste usado en cada uno.
+- **Actualización:** se amplió el espacio de búsqueda de hiperparámetros (sección 3) porque las ganadoras originales quedaban en los bordes. Con el espacio ampliado, `l2_regularization` **sigue ganando en el borde superior** (ahora 100.0, antes 10.0) en ambos grupos de variables, y en G1+G2 el tope de iteraciones también sigue copado (1000/1000). `min_samples_leaf` ya no queda en un borde. Pese a estos cambios, las métricas de validación **no cambiaron de forma relevante** (diferencias ≤0.0002 en ROC-AUC y PR-AUC, por debajo de la variabilidad entre configuraciones de la propia búsqueda).
 
 ## 2. Qué se hizo
 
@@ -21,31 +22,51 @@ Contrato de datos: `lc_36m_2007_2015h1_v4`. Todos los números de este informe s
 
 ## 3. Búsqueda de hiperparámetros
 
-**Protocolo.** Búsqueda aleatoria de 30 configuraciones (semilla 42), las mismas 30 para G1 y G1+G2. Cada una se ajusta con préstamos de train emitidos antes de 2013-07-01 y se puntúa en el resto de train (julio 2013 a junio 2014), la **subvalidación temporal**. El número de iteraciones sale de la mejor ROC-AUC de la subvalidación (`staged_predict_proba`, cada 10 iteraciones, tope 500). La configuración ganadora se reentrena con todo train y se evalúa **una vez** en la validación congelada, que no interviene en la elección.
+**Protocolo.** Búsqueda aleatoria de 30 configuraciones (semilla 42), las mismas 30 para G1 y G1+G2. Cada una se ajusta con préstamos de train emitidos antes de 2013-07-01 y se puntúa en el resto de train (julio 2013 a junio 2014), la **subvalidación temporal**. El número de iteraciones sale de la mejor ROC-AUC de la subvalidación (`staged_predict_proba`, cada 10 iteraciones, tope `MAX_ITER_CAP`). La configuración ganadora se reentrena con todo train y se evalúa **una vez** en la validación congelada, que no interviene en la elección.
 
-**Espacio de búsqueda:** `learning_rate` entre 0.02 y 0.2 (escala logarítmica), `max_leaf_nodes` ∈ {8, 15, 31, 63}, `max_depth` ∈ {sin límite, 4, 6, 8}, `min_samples_leaf` ∈ {20, 50, 100, 200, 500}, `l2_regularization` ∈ {0, 0.1, 1, 10}, `class_weight` ∈ {ninguno, balanced}. Elegí rangos estándar para boosting, que controlan el tamaño de los árboles, la velocidad de aprendizaje y la regularización. Las mejores configuraciones quedaron en los bordes, así que ampliar el espacio es un paso pendiente.
-**Configuraciones elegidas**
+### 3.1 Espacio original (primera corrida) y por qué se amplió
+
+Espacio original: `learning_rate` entre 0.02 y 0.2 (escala log), `max_leaf_nodes` ∈ {8, 15, 31, 63}, `max_depth` ∈ {sin límite, 4, 6, 8}, `min_samples_leaf` ∈ {20, 50, 100, 200, 500}, `l2_regularization` ∈ {0, 0.1, 1, 10}, `class_weight` ∈ {ninguno, balanced}, `MAX_ITER_CAP=500`.
+
+Con ese espacio, las ganadoras quedaron en varios bordes: `l2_regularization` ganó en 10.0 (el valor más alto) en ambos grupos; `min_samples_leaf` ganó en 500 (el más alto) en G1; `learning_rate` ganó cerca del extremo bajo (0.023–0.033 sobre un rango de 0.02–0.2); y el tope de 500 iteraciones se usó casi completo en las dos ganadoras (490/500 y 500/500). Eso sugiere que el espacio pudo estar recortando el óptimo, así que se ensanchó.
+
+### 3.2 Espacio ampliado (esta corrida)
+
+Cambios, justificados uno por uno a partir de qué borde tocaba cada parámetro:
+
+- `l2_regularization` ∈ {0, 0.1, 1, 10, 30, **100**}: se agregaron 30 y 100 porque 10 (el máximo anterior) ganó en ambos grupos.
+- `min_samples_leaf` ∈ {20, 50, 100, 200, 500, **1000**}: se agregó 1000 porque 500 (el máximo anterior) ganó en G1.
+- `learning_rate` entre **0.01** y 0.2 (escala log): se bajó el piso de 0.02 a 0.01 porque las ganadoras quedaban cerca del piso anterior.
+- `MAX_ITER_CAP`: 500 → **1000**, porque ambas ganadoras usaban el tope casi completo.
+- `max_leaf_nodes` y `max_depth` **no se tocaron**: la ganadora de G1+G2 en la corrida original usaba `max_depth=8` con solo 8 hojas, es decir la profundidad no estaba restringiendo nada en la práctica; ampliar esos ejes sin evidencia de que estuvieran en el borde habría sido arbitrario.
+- `n_iter` se mantuvo en 30 (no se subió) para poder comparar la dispersión de resultados contra la corrida original con el mismo número de configuraciones; duplicar `MAX_ITER_CAP` ya duplica aproximadamente el costo por configuración (`early_stopping=False`, así que el tiempo de ajuste escala con `max_iter`).
+
+**Configuraciones elegidas (espacio ampliado)**
 
 | Parámetro | G1 | G1+G2 |
 |---|---:|---:|
-| learning_rate | 0.03278 | 0.02287 |
+| learning_rate | 0.01621 | 0.01191 |
 | max_leaf_nodes | 15 | 8 |
-| max_depth | 4 | 8 |
-| min_samples_leaf | 500 | 50 |
-| l2_regularization | 10.0 | 10.0 |
+| max_depth | 8 | 8 |
+| min_samples_leaf | 200 | 50 |
+| l2_regularization | 100.0 | 100.0 |
 | class_weight | ninguno | ninguno |
-| max_iter (mejor en subvalidación) | 490 | 500 |
-| ROC-AUC en subvalidación | 0.6509 | 0.6667 |
+| max_iter (mejor en subvalidación) | 820 | 1000 |
+| ROC-AUC en subvalidación | 0.6514 | 0.6670 |
 
-**Qué muestra la búsqueda**
+**Qué muestra la búsqueda ampliada**
 
-- **Las 30 configuraciones rindieron casi igual.** En la subvalidación, la ROC-AUC va de 0.6453 a 0.6509 con G1 (desviación estándar 0.0014) y de 0.6615 a 0.6667 con G1+G2 (0.0013). Las diferencias entre las mejores son del orden de 0.0003, así que **la elección de la ganadora no es concluyente**: otra de las configuraciones del grupo de cabeza habría dado un resultado prácticamente igual.
-- **`class_weight`:** sin pesos, la ROC-AUC media fue algo mayor (G1: 0.6497 con 16 configuraciones contra 0.6483 con 14 con `balanced`; G1+G2: 0.6655 contra 0.6643). La diferencia es chica, pero consistente en ambos grupos.
-- **Tope de iteraciones:** la ganadora de G1 usó 490 de 500 y la de G1+G2 llegó al tope de 500. El tope pudo limitar el resultado. No se probó un tope mayor.
-- El árbol de G1+G2 tiene `max_depth=8` con solo 8 hojas, así que el límite de profundidad no restringe nada en la práctica.
-- Tiempo de la búsqueda (suma de los `seconds` de cada configuración): unos 133 s para G1 y 152 s para G1+G2. El reentrenamiento final tardó 3.0 s y 3.1 s. Máquina no registrada.
+- **Las 30 configuraciones vuelven a rendir casi igual.** ROC-AUC de subvalidación entre 0.6461 y 0.6514 con G1 (desviación estándar 0.0014) y entre 0.6622 y 0.6670 con G1+G2 (0.0013) — la misma dispersión que en la corrida original. La elección de la ganadora sigue sin ser concluyente.
+- **`l2_regularization` sigue en el borde superior**, ahora en 100.0 (el nuevo máximo) en ambos grupos. Ampliar el espacio no resolvió el patrón: solo movió el borde. No se probaron valores por encima de 100 porque, como se ve abajo, el movimiento del borde no se tradujo en una mejora real de las métricas de validación — seguir ensanchando este eje no parece prioritario.
+- **`min_samples_leaf` ya no está en un borde**: ganó en 200 (G1) y 50 (G1+G2), ambos dentro del espacio, por debajo incluso del máximo antiguo (500). Ese parámetro quedó resuelto.
+- **Tope de iteraciones:** en G1 la ganadora usó 820 de 1000 (ya no copa el tope); en G1+G2 sí llegó al nuevo tope (1000/1000) — sigue sin resolverse en ese grupo, aunque de nuevo sin traducirse en mejora visible.
+- **`learning_rate`:** la ganadora de G1 (0.01621) quedó bien dentro del nuevo rango; la de G1+G2 (0.01191) quedó cerca del nuevo piso (0.01), repitiendo el patrón de preferir tasas bajas.
+- **`class_weight`:** se repite el patrón anterior — sin pesos, la ROC-AUC media fue algo mayor (G1: 0.6502 con 16 configuraciones sin peso contra 0.6490 con 14 `balanced`; G1+G2: 0.6658 contra 0.6647).
+- Tiempo de la búsqueda (suma de `seconds` por configuración): 366 s para G1 y 385 s para G1+G2 (~12.5 min en total), frente a 133 s y 152 s con el espacio y el tope anteriores — el aumento es coherente con duplicar `MAX_ITER_CAP` (el ajuste no usa `early_stopping`, así que el costo escala con `max_iter`). El reentrenamiento final tardó 7.4 s y 8.0 s.
 
-Detalle completo: `search_boosting_kris_g1.csv` y `search_boosting_kris_g1_g2.csv`.
+**Conclusión de la ampliación.** El espacio más grande cambia **dónde** cae el óptimo de la búsqueda (menos `learning_rate`, más `l2_regularization`, más iteraciones) pero **no cambia el resultado en validación**: ROC-AUC y PR-AUC quedan dentro de ±0.0002 de los valores anteriores (sección 4), una diferencia muy por debajo de la dispersión de 0.0013–0.0014 entre configuraciones de la misma búsqueda. `l2_regularization` sigue pegada al borde superior ampliado, lo que indica que el modelo "preferiría" todavía más regularización, pero esa preferencia no se traduce en mejor desempeño medible — es más probable que sea una meseta plana en la superficie de validación que una mejora real por explotar. No se encontró evidencia de que el tope de iteraciones anterior (500) estuviera realmente limitando el resultado: en G1 el nuevo óptimo ni siquiera usa el tope anterior ampliado, y en G1+G2, aunque sigue copando el tope, la métrica final no mejoró.
+
+Detalle completo: `search_boosting_kris_g1.csv` y `search_boosting_kris_g1_g2.csv` (sobrescritos con la corrida del espacio ampliado; los valores de la corrida original quedan documentados arriba en el texto para referencia).
 
 ## 4. Resultados en validación (90,615 préstamos; 14.13% incumplen)
 
@@ -53,11 +74,13 @@ Detalle completo: `search_boosting_kris_g1.csv` y `search_boosting_kris_g1_g2.cs
 |---|---|---:|---:|
 | — | Dummy | 0.5000 | 0.1413 |
 | G1 | Regresión logística | 0.6548 | 0.2231 |
-| G1 | **HGB** | **0.6666** | **0.2329** |
+| G1 | **HGB** | **0.6665** | **0.2329** |
 | G1+G2 | Regresión logística | 0.6794 | 0.2450 |
-| G1+G2 | **HGB** | **0.6853** | **0.2512** |
+| G1+G2 | **HGB** | **0.6854** | **0.2510** |
 
-Diferencia HGB menos regresión logística: G1 +0.0117 (ROC-AUC) y +0.0098 (PR-AUC); G1+G2 +0.0059 y +0.0062. En ambos modelos, agregar G2 mejora más que cambiar de modelo.
+Diferencia HGB menos regresión logística: G1 +0.0117 (ROC-AUC) y +0.0098 (PR-AUC); G1+G2 +0.0060 y +0.0060. En ambos modelos, agregar G2 mejora más que cambiar de modelo.
+
+**Con el espacio de búsqueda ampliado (sección 3.2), el HGB prácticamente no cambió** frente a la corrida con el espacio original: ROC-AUC se movió -0.0001 (G1) y +0.0001 (G1+G2); PR-AUC se movió 0.0000 (G1) y -0.0002 (G1+G2). Son diferencias de cuarto decimal, muy por debajo de la dispersión entre configuraciones de la propia búsqueda (~0.0013). Los IC del bootstrap pareado de la sección 6 se calcularon con las predicciones de la corrida con el espacio original; dado que las métricas nuevas caen dentro de ese mismo orden de magnitud, las conclusiones de las secciones 5 a 8 (comparación a igual tasa de marcado, bootstrap, solapamiento, umbral 0.5) siguen siendo válidas y no se recalcularon.
 
 No se deben comparar con el Avance 1 (0.685 de ROC-AUC): cambiaron la población, las fechas y el plazo.
 
@@ -107,9 +130,9 @@ Los dos modelos ordenan los préstamos de forma bastante parecida, lo que concue
 | G1+G2 | Regresión logística | 0.212 | 0.666 | 0.322 | 44.3% |
 | G1+G2 | HGB | 0.000 | 0.000 | 0.000 | 0% |
 
-Matrices de confusión de HGB (filas = real 0/1, columnas = predicho 0/1): G1 `[[77813, 2], [12800, 0]]`; G1+G2 `[[77815, 0], [12800, 0]]`.
+Matrices de confusión de HGB con el espacio de búsqueda ampliado (filas = real 0/1, columnas = predicho 0/1): G1 `[[77815, 0], [12800, 0]]`; G1+G2 `[[77815, 0], [12800, 0]]`.
 
-Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalencia (14%): media 0.132 en G1 y 0.126 en G1+G2, percentil 99 en 0.32 y máximo 0.516 y 0.440, por lo que casi ninguna llega a 0.5. **Esos F1 y recall no son comparables** con los de la regresión logística, que usa `class_weight='balanced'`. La accuracy (0.8587) coincide con la del Dummy y no informa nada. Para comparar de forma justa se usan ROC-AUC, PR-AUC y la tabla de la sección 5.
+Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalencia (14%): media 0.132 en G1 y 0.126 en G1+G2, percentil 99 en 0.31 y máximo 0.48 y 0.44, por lo que ninguna llega a 0.5. **Esos F1 y recall no son comparables** con los de la regresión logística, que usa `class_weight='balanced'`. La accuracy (0.8587) coincide con la del Dummy y no informa nada. Para comparar de forma justa se usan ROC-AUC, PR-AUC y la tabla de la sección 5.
 
 ## 9. GradientBoosting clásico (comparación adicional)
 
@@ -129,11 +152,12 @@ Con umbral 0.5, el GradientBoosting clásico sí marca algunos préstamos como r
 ## 10. Limitaciones
 
 1. Una sola semilla (42) y una sola partición temporal; sin intervalos que incluyan la variabilidad de entrenamiento.
-2. La elección de hiperparámetros no es concluyente: las configuraciones de cabeza empatan en la subvalidación (sección 3). El tope de 500 iteraciones pudo limitar el resultado.
+2. La elección de hiperparámetros no es concluyente: las configuraciones de cabeza empatan en la subvalidación (sección 3). Se amplió el espacio de búsqueda y el tope de iteraciones (500 → 1000) y la ganadora de G1+G2 **sigue** copando el tope; `l2_regularization` sigue ganando en el borde superior del espacio ampliado (ahora 100.0). Ninguno de esos dos movimientos cambió las métricas de validación de forma medible, pero tampoco se puede descartar que un espacio aún mayor (o más iteraciones) cambie algo; no se exploró más allá por el costo de cómputo.
 3. Las puntuaciones no están calibradas como probabilidades reales de impago; el umbral 0.5 es provisional y no hay estimación de costes de error.
 4. Validación retrospectiva con *snapshot* 2018Q4 supuesto: los préstamos aún activos quedaron excluidos, con riesgo de sesgo de selección y censura. La población son solo préstamos aceptados a 36 meses.
 5. Los resultados con G1+G2 incorporan la evaluación crediticia previa de Lending Club (`grade`, `int_rate`), por lo que no son equivalentes a los de G1.
 6. No se analizaron errores por segmento ni posibles sesgos; eso corresponde a Rubí.
+7. **El ajuste de hiperparámetros ya no parece ser la palanca disponible.** Con 30 configuraciones por corrida, la dispersión de ROC-AUC en subvalidación es de solo ~0.0013–0.0014 (sección 3), y ampliar el espacio (punto 2 de esta lista) no movió la validación congelada más allá de ±0.0002. Esto sugiere una meseta: ni una búsqueda más fina (más iteraciones, grid más denso) ni una búsqueda más inteligente (ej. optimización bayesiana con Optuna) tienen mucha probabilidad de mejorar el resultado, porque el techo no parece estar en el ajuste del modelo sino en la información que aportan las variables actuales de G1/G1+G2. La vía con más potencial para mejorar el ROC-AUC sería ingeniería de variables (ratios, interacciones dentro de las variables permitidas, ej. `loan_amnt/annual_inc` o `fico_avg × dti`), **no explorada en este trabajo**. Esa vía requeriría coordinación con el equipo porque G1 y G1+G2 son un contrato de variables compartido (ver `reports/handoff_equipo_v42.md`): no es una decisión que le corresponda solo a boosting.
 
 ## 11. Reproducibilidad
 
@@ -141,11 +165,12 @@ Con umbral 0.5, el GradientBoosting clásico sí marca algunos préstamos como r
 python -m scripts.train_boosting_kris --n-iter 30 --with-gb
 ```
 
-Semilla 42; Python 3.14.8, scikit-learn 1.9.0, pandas 3.0.4, numpy 2.5.3. Salidas en `outputs/`: `metrics_boosting_kris_v4.json`, `predictions_valid_boosting_kris.csv`, `search_boosting_kris_g1.csv`, `search_boosting_kris_g1_g2.csv`. Las comparaciones de las secciones 5 a 7 se calcularon aparte con `predictions_valid_v4.csv` y `predictions_valid_boosting_kris.csv`, unidos por `id` (relación 1:1, 90,615 filas, mismo `target`); ese cálculo no está en el repositorio.
+Semilla 42; Python 3.14.8, scikit-learn 1.9.0, pandas 3.0.4, numpy 2.5.3. Con el espacio de búsqueda ampliado (sección 3.2, `MAX_ITER_CAP=1000`), la corrida de 30 configuraciones por grupo tardó ~366 s (G1) + ~385 s (G1+G2) ≈ 12.5 min en total; máquina no registrada. Salidas en `outputs/`: `metrics_boosting_kris_v4.json`, `predictions_valid_boosting_kris.csv`, `search_boosting_kris_g1.csv`, `search_boosting_kris_g1_g2.csv`. Las comparaciones de las secciones 5 a 7 se calcularon aparte con `predictions_valid_v4.csv` y `predictions_valid_boosting_kris.csv`, unidos por `id` (relación 1:1, 90,615 filas, mismo `target`); ese cálculo no está en el repositorio y no se repitió en esta corrida porque las métricas de HGB no cambiaron de forma relevante (sección 4).
 
 ## 12. Pendiente / no ejecutado
 
-- Corridas con otras semillas y búsqueda con un tope de iteraciones mayor a 500: **no se hicieron**.
+- Corridas con otras semillas: **no se hicieron**.
+- Espacio de búsqueda y tope de iteraciones (`sample_configs`, `MAX_ITER_CAP`): **ampliados** en esta actualización (sección 3.2: `l2_regularization` hasta 100, `min_samples_leaf` hasta 1000, `learning_rate` desde 0.01, `MAX_ITER_CAP` hasta 1000). `l2_regularization` sigue ganando en el nuevo borde superior y, en G1+G2, el tope de iteraciones sigue copado; un espacio todavía más amplio (o un tope aún mayor) queda como pendiente, con bajo valor esperado dado que las métricas de validación no se movieron con esta ampliación (ver limitación 7 de la sección 10).
 - Importancia de variables: **no calculada**.
 - Búsqueda de hiperparámetros para `GradientBoosting` clásico (sección 9 usó una sola configuración fija, sin subvalidación): **no se hizo**; no es comparable 1 a 1 con el proceso de HGB.
 - Evaluación sobre el test reservado: **no realizada**; se hará una sola vez al final, con el modelo ya elegido por el equipo.

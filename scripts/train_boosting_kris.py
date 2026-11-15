@@ -27,7 +27,10 @@ from src.models_boosting import (make_gb_classic, make_hgb, sample_configs,
 from src.splits import CONTRACT_ID, verify_partition
 
 INNER_SPLIT = pd.Timestamp('2013-07-01')  # últimos 12 meses de train = subvalidación
-MAX_ITER_CAP = 500
+# El tope anterior (500) se usó casi completo en ambas ganadoras de la
+# búsqueda previa (490/500 y 500/500; ver reports/resultados_boosting_kris.md
+# sección 3), lo que sugiere que pudo limitar el resultado. Se dobla a 1000.
+MAX_ITER_CAP = 1000
 EVAL_EVERY = 10
 
 

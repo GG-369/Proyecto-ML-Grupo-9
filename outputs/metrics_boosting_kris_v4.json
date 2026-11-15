@@ -14,26 +14,26 @@
   "results": {
     "hgb_g1": {
       "params": {
-        "learning_rate": 0.03278043168454925,
+        "learning_rate": 0.01621135894954145,
         "max_leaf_nodes": 15,
-        "max_depth": 4,
-        "min_samples_leaf": 500,
-        "l2_regularization": 10.0,
+        "max_depth": 8,
+        "min_samples_leaf": 200,
+        "l2_regularization": 100.0,
         "class_weight": null,
-        "max_iter": 490
+        "max_iter": 820
       },
-      "inner_roc_auc": 0.6509226203842238,
-      "roc_auc": 0.666573544825869,
-      "pr_auc": 0.23294396494499434,
+      "inner_roc_auc": 0.6513822815377633,
+      "roc_auc": 0.6664661396420999,
+      "pr_auc": 0.23288360591178706,
       "f1": 0.0,
-      "accuracy": 0.8587209623130828,
+      "accuracy": 0.858743033714065,
       "precision": 0.0,
       "recall": 0.0,
       "threshold": 0.5,
       "confusion_matrix": [
         [
-          77813,
-          2
+          77815,
+          0
         ],
         [
           12800,
@@ -42,15 +42,15 @@
       ],
       "positive_rate": 0.141256966285935,
       "target_prevalence": 0.141256966285935,
-      "predicted_positive_rate": 2.2071400982177342e-05,
+      "predicted_positive_rate": 0.0,
       "n": 90615,
       "top_decile": {
         "frac": 0.1,
         "k": 9062,
-        "capture": 0.19828125,
-        "lift": 1.982703097412271
+        "capture": 0.19734375,
+        "lift": 1.9733286146821891
       },
-      "fit_seconds": 4.1
+      "fit_seconds": 7.4
     },
     "gb_classic_g1": {
       "params": "n_estimators=200, lr=0.1, max_depth=3, subsample=0.8 (fija, sin búsqueda)",
@@ -85,17 +85,17 @@
     },
     "hgb_g1_g2": {
       "params": {
-        "learning_rate": 0.022873505997589794,
+        "learning_rate": 0.01190840553092921,
         "max_leaf_nodes": 8,
         "max_depth": 8,
         "min_samples_leaf": 50,
-        "l2_regularization": 10.0,
+        "l2_regularization": 100.0,
         "class_weight": null,
-        "max_iter": 500
+        "max_iter": 1000
       },
-      "inner_roc_auc": 0.6667321787646381,
-      "roc_auc": 0.6852745012208442,
-      "pr_auc": 0.2511678383856569,
+      "inner_roc_auc": 0.6669824975868814,
+      "roc_auc": 0.6854125409625393,
+      "pr_auc": 0.251017307448646,
       "f1": 0.0,
       "accuracy": 0.858743033714065,
       "precision": 0.0,
@@ -118,10 +118,10 @@
       "top_decile": {
         "frac": 0.1,
         "k": 9062,
-        "capture": 0.212265625,
-        "lift": 2.1225391314693223
+        "capture": 0.21265625,
+        "lift": 2.1264451659401895
       },
-      "fit_seconds": 4.3
+      "fit_seconds": 8.0
     },
     "gb_classic_g1_g2": {
       "params": "n_estimators=200, lr=0.1, max_depth=3, subsample=0.8 (fija, sin búsqueda)",
