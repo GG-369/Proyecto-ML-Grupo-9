@@ -9,6 +9,8 @@ Contrato de datos: `lc_36m_2007_2015h1_v4`. Todos los números de este informe s
 - El ranking de ambos modelos es muy parecido: el 63% (G1) y el 71% (G1+G2) de los préstamos del 10% más riesgoso coinciden.
 - Con umbral 0.5 el boosting casi no marca préstamos riesgosos (F1 = 0). No es un fallo: es consecuencia de no usar `class_weight='balanced'` en las configuraciones ganadoras (sección 8).
 - El modelo sigue sin estar listo para decisiones crediticias reales.
+- Por permutation importance (sección 10), `fico_avg` y `annual_inc` son las variables que más mueven la ROC-AUC en G1; con G1+G2, `int_rate` domina muy por encima del resto, dejando a `fico_avg` muy diluida.
+- Añadir `int_rate` no solo mejora la ROC-AUC (sección 4): también reordena casi todo el ranking de importancia, lo que sugiere que buena parte de la señal de G1 se superpone con lo que ya captura la calificación previa de Lending Club.
 
 ## 2. Qué se hizo
 
@@ -119,17 +121,68 @@ Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalenci
 5. Los resultados con G1+G2 incorporan la evaluación crediticia previa de Lending Club (`grade`, `int_rate`), por lo que no son equivalentes a los de G1.
 6. No se analizaron errores por segmento ni posibles sesgos; eso corresponde a Rubí.
 
-## 10. Reproducibilidad
+## 10. Importancia de variables (permutation importance)
+
+**Protocolo.** Para cada grupo (G1 y G1+G2) se reentrenó el pipeline de HGB con los hiperparámetros ganadores ya fijados en la sección 3 (mismo `max_iter`), usando todo `train.parquet`. Sobre la **validación congelada** se calculó `sklearn.inspection.permutation_importance` con `scoring='roc_auc'`, 10 repeticiones y semilla 42: cada variable se mezcla al azar 10 veces entre las filas de validación y se mide cuánto cae la ROC-AUC respecto al modelo sin mezclar; la media y la desviación estándar de esas 10 caídas son la importancia y su variabilidad. No se tocó el test reservado. Código: `scripts/feature_importance_boosting_kris.py`; salida completa en `outputs/feature_importance_boosting_kris.json`.
+
+**G1 — 10 variables más importantes**
+
+| # | Variable | Importancia media | Desv. estándar |
+|---:|---|---:|---:|
+| 1 | fico_avg | 0.0497 | 0.0014 |
+| 2 | annual_inc | 0.0357 | 0.0012 |
+| 3 | loan_amnt | 0.0211 | 0.0006 |
+| 4 | inq_last_6mths | 0.0133 | 0.0007 |
+| 5 | dti | 0.0113 | 0.0005 |
+| 6 | purpose | 0.0100 | 0.0006 |
+| 7 | addr_state | 0.0087 | 0.0006 |
+| 8 | revol_bal | 0.0081 | 0.0005 |
+| 9 | open_acc | 0.0074 | 0.0006 |
+| 10 | home_ownership | 0.0049 | 0.0003 |
+
+El resto de G1 (`emp_length`, `hist_crediticio_anios`, `revol_util`, `total_acc`, `verification_status`, `pub_rec`, `delinq_2yrs`, `term`) queda por debajo de 0.004, con `term` en 0.0000 (sin variación en esta cohorte, ya que el contrato v4 es exclusivamente préstamos a 36 meses).
+
+**G1+G2 — 10 variables más importantes**
+
+| # | Variable | Grupo | Importancia media | Desv. estándar |
+|---:|---|---|---:|---:|
+| 1 | int_rate | G2 | 0.0589 | 0.0022 |
+| 2 | annual_inc | G1 | 0.0155 | 0.0008 |
+| 3 | addr_state | G1 | 0.0051 | 0.0003 |
+| 4 | grade | G2 | 0.0050 | 0.0004 |
+| 5 | installment | G2 | 0.0046 | 0.0002 |
+| 6 | dti | G1 | 0.0046 | 0.0003 |
+| 7 | fico_avg | G1 | 0.0042 | 0.0004 |
+| 8 | loan_amnt | G1 | 0.0035 | 0.0002 |
+| 9 | inq_last_6mths | G1 | 0.0028 | 0.0003 |
+| 10 | emp_length | G1 | 0.0026 | 0.0002 |
+
+**Qué muestra**
+
+- En G1, `fico_avg` y `annual_inc` concentran la mayor parte de la señal; juntas superan la suma de las siguientes ocho variables.
+- Al añadir G2, `int_rate` pasa a ser, por lejos, la variable más importante (más del triple que la segunda), y empuja a `fico_avg` del primer lugar en G1 al séptimo en G1+G2 — consistente con que `int_rate` ya incorpora buena parte de lo que el buró de crédito mide con el FICO y otras variables de G1 (ver limitación 5 de la sección 9).
+- `grade` e `installment` aparecen cerca de `annual_inc` en importancia, por debajo de `int_rate` pero por encima del resto de variables de G1.
+- Ninguna variable fue negativa de forma consistente; en G1+G2, `total_acc` salió con media ligeramente negativa (-0.00004, dentro del rango del ruido de la permutación) y se excluye del top 10.
+
+**Limitaciones de esta sección**
+
+1. Permutation importance mide la caída de ROC-AUC de *este* modelo con *estos* hiperparámetros al mezclar una variable; no es una medida causal ni se traslada directamente a otro algoritmo o a otra búsqueda de hiperparámetros.
+2. Con variables correlacionadas (p. ej. `fico_avg` con el buró de crédito en general, o `int_rate`/`grade`/`installment` entre sí, que Lending Club deriva en parte de `grade`), la importancia puede repartirse de forma engañosa entre ellas: mezclar una sola variable correlacionada con otras no eliminada toda la señal, porque el modelo puede seguir usando la variable correlacionada que no se mezcló. Esto probablemente explica por qué `fico_avg` cae tanto al añadir `int_rate`/`grade`.
+3. Solo una semilla (42) y 10 repeticiones; no se probó con otra partición temporal ni con otra búsqueda de hiperparámetros.
+4. No se calculó importancia nativa de ganancia/split: `HistGradientBoostingClassifier` no la expone de forma directa y agregarla con un método aproximado (p. ej. basado en SHAP) no se hizo en esta vuelta.
+
+## 11. Reproducibilidad
 
 ```bash
 python -m scripts.train_boosting_kris --n-iter 30
+python -m scripts.feature_importance_boosting_kris
 ```
 
-Semilla 42; Python 3.14.8, scikit-learn 1.9.0, pandas 3.0.4, numpy 2.5.3. Salidas en `outputs/`: `metrics_boosting_kris_v4.json`, `predictions_valid_boosting_kris.csv`, `search_boosting_kris_g1.csv`, `search_boosting_kris_g1_g2.csv`. Las comparaciones de las secciones 5 a 7 se calcularon aparte con `predictions_valid_v4.csv` y `predictions_valid_boosting_kris.csv`, unidos por `id` (relación 1:1, 90,615 filas, mismo `target`); ese cálculo no está en el repositorio.
+Semilla 42; Python 3.14.8, scikit-learn 1.9.0, pandas 3.0.4, numpy 2.5.3. Salidas en `outputs/`: `metrics_boosting_kris_v4.json`, `predictions_valid_boosting_kris.csv`, `search_boosting_kris_g1.csv`, `search_boosting_kris_g1_g2.csv`, `feature_importance_boosting_kris.json`. Las comparaciones de las secciones 5 a 7 se calcularon aparte con `predictions_valid_v4.csv` y `predictions_valid_boosting_kris.csv`, unidos por `id` (relación 1:1, 90,615 filas, mismo `target`); ese cálculo no está en el repositorio.
 
-## 11. Pendiente / no ejecutado
+## 12. Pendiente / no ejecutado
 
 - `GradientBoosting` clásico (`--with-gb`): **no se ejecutó**.
 - Corridas con otras semillas y búsqueda con un tope de iteraciones mayor a 500: **no se hicieron**.
-- Importancia de variables: **no calculada**.
+- Importancia nativa de ganancia/split (o SHAP) como complemento a permutation importance: **no calculada**.
 - Evaluación sobre el test reservado: **no realizada**; se hará una sola vez al final, con el modelo ya elegido por el equipo.

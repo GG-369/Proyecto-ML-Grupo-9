@@ -1,0 +1,293 @@
+{
+  "contract_id": "lc_36m_2007_2015h1_v4",
+  "train_n": 244943,
+  "valid_n": 90615,
+  "seed": 42,
+  "n_repeats": 10,
+  "scoring": "roc_auc",
+  "note": "Permutation importance sobre la validación congelada, con los hiperparámetros ya elegidos por la búsqueda aleatoria (sección 3 del reporte). No se usó el test reservado.",
+  "versions": {
+    "python": "3.14.8",
+    "sklearn": "1.9.0",
+    "pandas": "3.0.4",
+    "numpy": "2.5.3"
+  },
+  "results": {
+    "g1": {
+      "tag": "g1",
+      "include_g2": false,
+      "params": {
+        "learning_rate": 0.03278043168454925,
+        "max_leaf_nodes": 15,
+        "max_depth": 4,
+        "min_samples_leaf": 500,
+        "l2_regularization": 10.0,
+        "class_weight": null,
+        "max_iter": 490
+      },
+      "fit_seconds": 3.5,
+      "permutation_importance_seconds": 81.0,
+      "n_repeats": 10,
+      "seed": 42,
+      "scoring": "roc_auc",
+      "n_valid": 90615,
+      "importances": [
+        {
+          "feature": "fico_avg",
+          "group": "G1",
+          "importance_mean": 0.04973236462282328,
+          "importance_std": 0.0014268433497985416
+        },
+        {
+          "feature": "annual_inc",
+          "group": "G1",
+          "importance_mean": 0.03572257658388476,
+          "importance_std": 0.0012330319817540488
+        },
+        {
+          "feature": "loan_amnt",
+          "group": "G1",
+          "importance_mean": 0.02107592828342856,
+          "importance_std": 0.0006377428877138492
+        },
+        {
+          "feature": "inq_last_6mths",
+          "group": "G1",
+          "importance_mean": 0.013334617261292748,
+          "importance_std": 0.0006870016527600569
+        },
+        {
+          "feature": "dti",
+          "group": "G1",
+          "importance_mean": 0.011269336426942023,
+          "importance_std": 0.0004665712654727995
+        },
+        {
+          "feature": "purpose",
+          "group": "G1",
+          "importance_mean": 0.010013337924885823,
+          "importance_std": 0.0005663384998678094
+        },
+        {
+          "feature": "addr_state",
+          "group": "G1",
+          "importance_mean": 0.008709273898830439,
+          "importance_std": 0.0005905092736957595
+        },
+        {
+          "feature": "revol_bal",
+          "group": "G1",
+          "importance_mean": 0.008135539621216903,
+          "importance_std": 0.0005440787660530912
+        },
+        {
+          "feature": "open_acc",
+          "group": "G1",
+          "importance_mean": 0.0074264565797081405,
+          "importance_std": 0.0005672155622397606
+        },
+        {
+          "feature": "home_ownership",
+          "group": "G1",
+          "importance_mean": 0.004904828158131336,
+          "importance_std": 0.0003465888207053122
+        },
+        {
+          "feature": "emp_length",
+          "group": "G1",
+          "importance_mean": 0.003832204587804355,
+          "importance_std": 0.00027096412945412776
+        },
+        {
+          "feature": "hist_crediticio_anios",
+          "group": "G1",
+          "importance_mean": 0.003130338583499237,
+          "importance_std": 0.0002981982680534025
+        },
+        {
+          "feature": "revol_util",
+          "group": "G1",
+          "importance_mean": 0.002999285665520679,
+          "importance_std": 0.0003442027445341993
+        },
+        {
+          "feature": "total_acc",
+          "group": "G1",
+          "importance_mean": 0.0015806187953799956,
+          "importance_std": 0.00028735725697915456
+        },
+        {
+          "feature": "verification_status",
+          "group": "G1",
+          "importance_mean": 0.0005093137569876505,
+          "importance_std": 5.9347937549240614e-05
+        },
+        {
+          "feature": "pub_rec",
+          "group": "G1",
+          "importance_mean": 0.0003856780705839946,
+          "importance_std": 0.00015480276927511694
+        },
+        {
+          "feature": "delinq_2yrs",
+          "group": "G1",
+          "importance_mean": 0.00011421249518074328,
+          "importance_std": 5.678602668089667e-05
+        },
+        {
+          "feature": "term",
+          "group": "G1",
+          "importance_mean": 0.0,
+          "importance_std": 0.0
+        }
+      ]
+    },
+    "g1_g2": {
+      "tag": "g1_g2",
+      "include_g2": true,
+      "params": {
+        "learning_rate": 0.022873505997589794,
+        "max_leaf_nodes": 8,
+        "max_depth": 8,
+        "min_samples_leaf": 50,
+        "l2_regularization": 10.0,
+        "class_weight": null,
+        "max_iter": 500
+      },
+      "fit_seconds": 2.8,
+      "permutation_importance_seconds": 85.1,
+      "n_repeats": 10,
+      "seed": 42,
+      "scoring": "roc_auc",
+      "n_valid": 90615,
+      "importances": [
+        {
+          "feature": "int_rate",
+          "group": "G2",
+          "importance_mean": 0.058852143907022966,
+          "importance_std": 0.002162525818105886
+        },
+        {
+          "feature": "annual_inc",
+          "group": "G1",
+          "importance_mean": 0.01553468061267097,
+          "importance_std": 0.0008108557554470729
+        },
+        {
+          "feature": "addr_state",
+          "group": "G1",
+          "importance_mean": 0.005087731568865184,
+          "importance_std": 0.0003263687726219867
+        },
+        {
+          "feature": "grade",
+          "group": "G2",
+          "importance_mean": 0.005018940154533103,
+          "importance_std": 0.0003972639580809148
+        },
+        {
+          "feature": "installment",
+          "group": "G2",
+          "importance_mean": 0.004647050998361402,
+          "importance_std": 0.00021449179321686695
+        },
+        {
+          "feature": "dti",
+          "group": "G1",
+          "importance_mean": 0.004606698780761953,
+          "importance_std": 0.00033564550044184614
+        },
+        {
+          "feature": "fico_avg",
+          "group": "G1",
+          "importance_mean": 0.004180736161087095,
+          "importance_std": 0.0004012181678135172
+        },
+        {
+          "feature": "loan_amnt",
+          "group": "G1",
+          "importance_mean": 0.0035127272015355927,
+          "importance_std": 0.00023410756097773752
+        },
+        {
+          "feature": "inq_last_6mths",
+          "group": "G1",
+          "importance_mean": 0.002775177805532281,
+          "importance_std": 0.0002956162710005503
+        },
+        {
+          "feature": "emp_length",
+          "group": "G1",
+          "importance_mean": 0.0026058239092719205,
+          "importance_std": 0.00022161213097344722
+        },
+        {
+          "feature": "home_ownership",
+          "group": "G1",
+          "importance_mean": 0.002526628461736069,
+          "importance_std": 0.00018794755448649372
+        },
+        {
+          "feature": "open_acc",
+          "group": "G1",
+          "importance_mean": 0.0021397225189551117,
+          "importance_std": 0.0002615817768449508
+        },
+        {
+          "feature": "hist_crediticio_anios",
+          "group": "G1",
+          "importance_mean": 0.0011822771758336237,
+          "importance_std": 0.00021981905309867441
+        },
+        {
+          "feature": "purpose",
+          "group": "G1",
+          "importance_mean": 0.0011390455326735437,
+          "importance_std": 0.00024071232754426574
+        },
+        {
+          "feature": "revol_bal",
+          "group": "G1",
+          "importance_mean": 0.0009423440210755251,
+          "importance_std": 0.00025921260695204205
+        },
+        {
+          "feature": "verification_status",
+          "group": "G1",
+          "importance_mean": 0.0003754160508898319,
+          "importance_std": 6.665832803286679e-05
+        },
+        {
+          "feature": "pub_rec",
+          "group": "G1",
+          "importance_mean": 0.00018084941046061508,
+          "importance_std": 9.910345642610656e-05
+        },
+        {
+          "feature": "revol_util",
+          "group": "G1",
+          "importance_mean": 0.00012183112590749,
+          "importance_std": 6.540370358080216e-05
+        },
+        {
+          "feature": "delinq_2yrs",
+          "group": "G1",
+          "importance_mean": 1.9134023806366417e-05,
+          "importance_std": 1.3752836711570958e-05
+        },
+        {
+          "feature": "term",
+          "group": "G1",
+          "importance_mean": 0.0,
+          "importance_std": 0.0
+        },
+        {
+          "feature": "total_acc",
+          "group": "G1",
+          "importance_mean": -4.4855687367584275e-05,
+          "importance_std": 4.384988628830668e-05
+        }
+      ]
+    }
+  }
+}
