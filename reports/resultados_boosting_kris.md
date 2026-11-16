@@ -9,7 +9,7 @@ Contrato de datos: `lc_36m_2007_2015h1_v4`. Todos los números de este informe s
 - El ranking de ambos modelos es muy parecido: el 63% (G1) y el 71% (G1+G2) de los préstamos del 10% más riesgoso coinciden.
 - Con umbral 0.5 el boosting casi no marca préstamos riesgosos (F1 = 0). No es un fallo: es consecuencia de no usar `class_weight='balanced'` en las configuraciones ganadoras (sección 8).
 - El modelo sigue sin estar listo para decisiones crediticias reales.
-- `GradientBoostingClassifier` clásico, con una sola configuración fija y sin búsqueda, queda algo por debajo de HGB en ambos grupos de variables y tarda entre 35 y 40 veces más en entrenarse (sección 9). No es una comparación justa de algoritmos, solo del presupuesto de ajuste usado en cada uno.
+- `GradientBoostingClassifier` clásico, con una sola configuración fija y sin búsqueda, queda algo por debajo de HGB en ambos grupos de variables y tarda entre 20 y 22 veces más en entrenarse (sección 9). No es una comparación justa de algoritmos, solo del presupuesto de ajuste usado en cada uno.
 - **Actualización:** se amplió el espacio de búsqueda de hiperparámetros (sección 3) porque las ganadoras originales quedaban en los bordes. Con el espacio ampliado, `l2_regularization` **sigue ganando en el borde superior** (ahora 100.0, antes 10.0) en ambos grupos de variables, y en G1+G2 el tope de iteraciones también sigue copado (1000/1000). `min_samples_leaf` ya no queda en un borde. Pese a estos cambios, las métricas de validación **no cambiaron de forma relevante** (diferencias ≤0.0002 en ROC-AUC y PR-AUC, por debajo de la variabilidad entre configuraciones de la propia búsqueda).
 - Por permutation importance (sección 11), `fico_avg` y `annual_inc` son las variables que más mueven la ROC-AUC en G1; con G1+G2, `int_rate` domina muy por encima del resto, dejando a `fico_avg` muy diluida — añadir `int_rate` reordena casi todo el ranking, consistente con que su señal se superpone con lo que ya captura la calificación previa de Lending Club.
 
@@ -57,7 +57,7 @@ Cambios, justificados uno por uno a partir de qué borde tocaba cada parámetro:
 
 **Qué muestra la búsqueda ampliada**
 
-- **Las 30 configuraciones vuelven a rendir casi igual.** ROC-AUC de subvalidación entre 0.6461 y 0.6514 con G1 (desviación estándar 0.0014) y entre 0.6622 y 0.6670 con G1+G2 (0.0013) — la misma dispersión que en la corrida original. La elección de la ganadora sigue sin ser concluyente.
+- **Las 30 configuraciones vuelven a rendir casi igual.** ROC-AUC de subvalidación entre 0.6461 y 0.6514 con G1 (desviación estándar 0.0013) y entre 0.6622 y 0.6670 con G1+G2 (0.0013) — la misma dispersión que en la corrida original. La elección de la ganadora sigue sin ser concluyente.
 - **`l2_regularization` sigue en el borde superior**, ahora en 100.0 (el nuevo máximo) en ambos grupos. Ampliar el espacio no resolvió el patrón: solo movió el borde. No se probaron valores por encima de 100 porque, como se ve abajo, el movimiento del borde no se tradujo en una mejora real de las métricas de validación — seguir ensanchando este eje no parece prioritario.
 - **`min_samples_leaf` ya no está en un borde**: ganó en 200 (G1) y 50 (G1+G2), ambos dentro del espacio, por debajo incluso del máximo antiguo (500). Ese parámetro quedó resuelto.
 - **Tope de iteraciones:** en G1 la ganadora usó 820 de 1000 (ya no copa el tope); en G1+G2 sí llegó al nuevo tope (1000/1000) — sigue sin resolverse en ese grupo, aunque de nuevo sin traducirse en mejora visible.
@@ -127,13 +127,13 @@ Los dos modelos ordenan los préstamos de forma bastante parecida, lo que concue
 | Variables | Modelo | Precisión | Recall | F1 | Predichos riesgosos |
 |---|---|---:|---:|---:|---:|
 | G1 | Regresión logística | 0.195 | 0.688 | 0.304 | 49.8% |
-| G1 | HGB | 0.000 | 0.000 | 0.000 | 0.002% |
+| G1 | HGB | 0.000 | 0.000 | 0.000 | 0% |
 | G1+G2 | Regresión logística | 0.212 | 0.666 | 0.322 | 44.3% |
 | G1+G2 | HGB | 0.000 | 0.000 | 0.000 | 0% |
 
 Matrices de confusión de HGB con el espacio de búsqueda ampliado (filas = real 0/1, columnas = predicho 0/1): G1 `[[77815, 0], [12800, 0]]`; G1+G2 `[[77815, 0], [12800, 0]]`.
 
-Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalencia (14%): media 0.132 en G1 y 0.126 en G1+G2, percentil 99 en 0.31 y máximo 0.48 y 0.44, por lo que ninguna llega a 0.5. **Esos F1 y recall no son comparables** con los de la regresión logística, que usa `class_weight='balanced'`. La accuracy (0.8587) coincide con la del Dummy y no informa nada. Para comparar de forma justa se usan ROC-AUC, PR-AUC y la tabla de la sección 5.
+Las puntuaciones del HGB sin pesos de clase se concentran cerca de la prevalencia (14%): media 0.132 en G1 y 0.126 en G1+G2, percentil 99 en 0.31 (G1) y 0.32 (G1+G2), máximo 0.48 y 0.44, por lo que ninguna llega a 0.5. **Esos F1 y recall no son comparables** con los de la regresión logística, que usa `class_weight='balanced'`. La accuracy (0.8587) coincide con la del Dummy y no informa nada. Para comparar de forma justa se usan ROC-AUC, PR-AUC y la tabla de la sección 5.
 
 ## 9. GradientBoosting clásico (comparación adicional)
 
@@ -141,12 +141,12 @@ Se ejecutó `GradientBoostingClassifier` de scikit-learn con hiperparámetros fi
 
 | Variables | Modelo | ROC-AUC | PR-AUC | Captura top-10% | Tiempo de ajuste |
 |---|---|---:|---:|---:|---:|
-| G1 | HGB (con búsqueda) | **0.6666** | **0.2329** | 0.198 | 4.1 s |
+| G1 | HGB (con búsqueda, espacio ampliado) | **0.6665** | **0.2329** | 0.197 | 7.4 s |
 | G1 | GradientBoosting clásico (sin búsqueda) | 0.6633 | 0.2301 | 0.197 | 151.2 s |
-| G1+G2 | HGB (con búsqueda) | **0.6853** | **0.2512** | 0.212 | 4.3 s |
+| G1+G2 | HGB (con búsqueda, espacio ampliado) | **0.6854** | **0.2510** | 0.213 | 8.0 s |
 | G1+G2 | GradientBoosting clásico (sin búsqueda) | 0.6826 | 0.2444 | 0.209 | 172.5 s |
 
-HGB queda ligeramente por encima del GradientBoosting clásico en ambos grupos de variables, pero la comparación **no es justa**: HGB tuvo 30 configuraciones de búsqueda con subvalidación temporal y el clásico usó una sola configuración arbitraria. No se puede concluir que HGB sea mejor algoritmo; solo que, con este presupuesto de ajuste, rindió algo mejor y fue entre 35 y 40 veces más rápido de entrenar (4 s contra 150–170 s por corrida), lo que en la práctica también facilitó hacer la búsqueda de 30 configuraciones que sí se le hizo a HGB.
+HGB queda ligeramente por encima del GradientBoosting clásico en ambos grupos de variables, pero la comparación **no es justa**: HGB tuvo 30 configuraciones de búsqueda con subvalidación temporal y el clásico usó una sola configuración arbitraria. No se puede concluir que HGB sea mejor algoritmo; solo que, con este presupuesto de ajuste, rindió algo mejor y fue entre 20 y 22 veces más rápido de reentrenar con la configuración ya elegida (7-8 s contra 150-173 s por corrida), lo que en la práctica también facilitó hacer la búsqueda de 30 configuraciones que sí se le hizo a HGB.
 
 Con umbral 0.5, el GradientBoosting clásico sí marca algunos préstamos como riesgosos (a diferencia de HGB, que no marca ninguno): precisión 0.293/recall 0.0009 en G1 y precisión 0.341/recall 0.0033 en G1+G2 (F1 de 0.0019 y 0.0065 respectivamente). Siguen siendo recalls prácticamente nulos e inútiles para decisiones reales; no se usó `class_weight` en ninguno de los dos modelos clásicos.
 
