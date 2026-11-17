@@ -1,0 +1,5 @@
+config_id,max_depth,min_samples_leaf,class_weight,inner_roc_auc,fit_and_score_seconds
+0,6.0,100,balanced,0.651375440074548,2.0
+3,12.0,500,balanced,0.644816094171841,3.2
+1,12.0,100,balanced,0.6222339026043607,5.4
+2,,100,balanced,0.6136803509749571,7.1

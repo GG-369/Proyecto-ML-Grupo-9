@@ -1,0 +1,532 @@
+{
+  "source": "predictions_valid_tree_nicolas.csv",
+  "partition": "valid",
+  "threshold": 0.5,
+  "n": 90615,
+  "models": {
+    "score_decision_tree_g1": {
+      "metrics_at_threshold": {
+        "roc_auc": 0.6323309873578359,
+        "pr_auc": 0.208444656555797,
+        "f1": 0.2927404067831344,
+        "accuracy": 0.5429564641615626,
+        "precision": 0.18731560198439584,
+        "recall": 0.669609375,
+        "threshold": 0.5,
+        "confusion_matrix": [
+          [
+            40629,
+            37186
+          ],
+          [
+            4229,
+            8571
+          ]
+        ],
+        "positive_rate": 0.141256966285935,
+        "target_prevalence": 0.141256966285935,
+        "predicted_positive_rate": 0.5049605473707444,
+        "n": 90615
+      },
+      "by_issue_month": [
+        {
+          "month": "2014-07",
+          "n": 19941,
+          "prevalence": 0.13529913244070008,
+          "false_positives": 8379,
+          "false_negatives": 909
+        },
+        {
+          "month": "2014-08",
+          "n": 13283,
+          "prevalence": 0.13483399834374765,
+          "false_positives": 5257,
+          "false_negatives": 596
+        },
+        {
+          "month": "2014-09",
+          "n": 7371,
+          "prevalence": 0.14163614163614163,
+          "false_positives": 2717,
+          "false_negatives": 364
+        },
+        {
+          "month": "2014-10",
+          "n": 26573,
+          "prevalence": 0.14909870921612162,
+          "false_positives": 11250,
+          "false_negatives": 1252
+        },
+        {
+          "month": "2014-11",
+          "n": 16573,
+          "prevalence": 0.1422796114161588,
+          "false_positives": 6968,
+          "false_negatives": 770
+        },
+        {
+          "month": "2014-12",
+          "n": 6874,
+          "prevalence": 0.13776549316264183,
+          "false_positives": 2615,
+          "false_negatives": 338
+        }
+      ],
+      "score_deciles": [
+        {
+          "decile_low_to_high": 1,
+          "n": 9061,
+          "mean_score": 0.1836216186987768,
+          "actual_default_rate": 0.05098774969650149
+        },
+        {
+          "decile_low_to_high": 2,
+          "n": 9061,
+          "mean_score": 0.3098123154484413,
+          "actual_default_rate": 0.07813707096346982
+        },
+        {
+          "decile_low_to_high": 3,
+          "n": 9062,
+          "mean_score": 0.3787853853313196,
+          "actual_default_rate": 0.10560582652836019
+        },
+        {
+          "decile_low_to_high": 4,
+          "n": 9061,
+          "mean_score": 0.4291076207596631,
+          "actual_default_rate": 0.11621233859397417
+        },
+        {
+          "decile_low_to_high": 5,
+          "n": 9062,
+          "mean_score": 0.4780725535565345,
+          "actual_default_rate": 0.12116530567203708
+        },
+        {
+          "decile_low_to_high": 6,
+          "n": 9061,
+          "mean_score": 0.5190140125454408,
+          "actual_default_rate": 0.1481072729279329
+        },
+        {
+          "decile_low_to_high": 7,
+          "n": 9062,
+          "mean_score": 0.5516646260174358,
+          "actual_default_rate": 0.1648642683734275
+        },
+        {
+          "decile_low_to_high": 8,
+          "n": 9061,
+          "mean_score": 0.5886802065530153,
+          "actual_default_rate": 0.17945039178898575
+        },
+        {
+          "decile_low_to_high": 9,
+          "n": 9062,
+          "mean_score": 0.6350859753199845,
+          "actual_default_rate": 0.1975281394835577
+        },
+        {
+          "decile_low_to_high": 10,
+          "n": 9062,
+          "mean_score": 0.7052029263878928,
+          "actual_default_rate": 0.2504965791216067
+        }
+      ]
+    },
+    "score_random_forest_g1": {
+      "metrics_at_threshold": {
+        "roc_auc": 0.6559817224747799,
+        "pr_auc": 0.22381601056275585,
+        "f1": 0.3073045875172278,
+        "accuracy": 0.6117419853225183,
+        "precision": 0.2054224795998947,
+        "recall": 0.6096875,
+        "threshold": 0.5,
+        "confusion_matrix": [
+          [
+            47629,
+            30186
+          ],
+          [
+            4996,
+            7804
+          ]
+        ],
+        "positive_rate": 0.141256966285935,
+        "target_prevalence": 0.141256966285935,
+        "predicted_positive_rate": 0.4192462616564586,
+        "n": 90615
+      },
+      "by_issue_month": [
+        {
+          "month": "2014-07",
+          "n": 19941,
+          "prevalence": 0.13529913244070008,
+          "false_positives": 6743,
+          "false_negatives": 1072
+        },
+        {
+          "month": "2014-08",
+          "n": 13283,
+          "prevalence": 0.13483399834374765,
+          "false_positives": 4242,
+          "false_negatives": 730
+        },
+        {
+          "month": "2014-09",
+          "n": 7371,
+          "prevalence": 0.14163614163614163,
+          "false_positives": 2162,
+          "false_negatives": 435
+        },
+        {
+          "month": "2014-10",
+          "n": 26573,
+          "prevalence": 0.14909870921612162,
+          "false_positives": 9266,
+          "false_negatives": 1446
+        },
+        {
+          "month": "2014-11",
+          "n": 16573,
+          "prevalence": 0.1422796114161588,
+          "false_positives": 5689,
+          "false_negatives": 910
+        },
+        {
+          "month": "2014-12",
+          "n": 6874,
+          "prevalence": 0.13776549316264183,
+          "false_positives": 2084,
+          "false_negatives": 403
+        }
+      ],
+      "score_deciles": [
+        {
+          "decile_low_to_high": 1,
+          "n": 9061,
+          "mean_score": 0.2772458499636955,
+          "actual_default_rate": 0.03818563072508553
+        },
+        {
+          "decile_low_to_high": 2,
+          "n": 9061,
+          "mean_score": 0.3592101765600958,
+          "actual_default_rate": 0.0667696722216091
+        },
+        {
+          "decile_low_to_high": 3,
+          "n": 9062,
+          "mean_score": 0.4043535979927302,
+          "actual_default_rate": 0.08971529463694548
+        },
+        {
+          "decile_low_to_high": 4,
+          "n": 9061,
+          "mean_score": 0.4375799959263569,
+          "actual_default_rate": 0.1133428981348637
+        },
+        {
+          "decile_low_to_high": 5,
+          "n": 9062,
+          "mean_score": 0.4655772974051614,
+          "actual_default_rate": 0.12524828956080336
+        },
+        {
+          "decile_low_to_high": 6,
+          "n": 9061,
+          "mean_score": 0.49202308293562314,
+          "actual_default_rate": 0.14689327888754
+        },
+        {
+          "decile_low_to_high": 7,
+          "n": 9062,
+          "mean_score": 0.5183873897388783,
+          "actual_default_rate": 0.16773339218715516
+        },
+        {
+          "decile_low_to_high": 8,
+          "n": 9061,
+          "mean_score": 0.5468193523288373,
+          "actual_default_rate": 0.18993488577419712
+        },
+        {
+          "decile_low_to_high": 9,
+          "n": 9062,
+          "mean_score": 0.5803477662474514,
+          "actual_default_rate": 0.2074597219156919
+        },
+        {
+          "decile_low_to_high": 10,
+          "n": 9062,
+          "mean_score": 0.6296570131993179,
+          "actual_default_rate": 0.2672699183403222
+        }
+      ]
+    },
+    "score_decision_tree_g1_g2": {
+      "metrics_at_threshold": {
+        "roc_auc": 0.6658118248208892,
+        "pr_auc": 0.22898696251772746,
+        "f1": 0.3134694479794906,
+        "accuracy": 0.5892181206202064,
+        "precision": 0.20517153963157006,
+        "recall": 0.66390625,
+        "threshold": 0.5,
+        "confusion_matrix": [
+          [
+            44894,
+            32921
+          ],
+          [
+            4302,
+            8498
+          ]
+        ],
+        "positive_rate": 0.141256966285935,
+        "target_prevalence": 0.141256966285935,
+        "predicted_positive_rate": 0.4570876786404017,
+        "n": 90615
+      },
+      "by_issue_month": [
+        {
+          "month": "2014-07",
+          "n": 19941,
+          "prevalence": 0.13529913244070008,
+          "false_positives": 7505,
+          "false_negatives": 928
+        },
+        {
+          "month": "2014-08",
+          "n": 13283,
+          "prevalence": 0.13483399834374765,
+          "false_positives": 4860,
+          "false_negatives": 612
+        },
+        {
+          "month": "2014-09",
+          "n": 7371,
+          "prevalence": 0.14163614163614163,
+          "false_positives": 2506,
+          "false_negatives": 375
+        },
+        {
+          "month": "2014-10",
+          "n": 26573,
+          "prevalence": 0.14909870921612162,
+          "false_positives": 9893,
+          "false_negatives": 1246
+        },
+        {
+          "month": "2014-11",
+          "n": 16573,
+          "prevalence": 0.1422796114161588,
+          "false_positives": 5933,
+          "false_negatives": 812
+        },
+        {
+          "month": "2014-12",
+          "n": 6874,
+          "prevalence": 0.13776549316264183,
+          "false_positives": 2224,
+          "false_negatives": 329
+        }
+      ],
+      "score_deciles": [
+        {
+          "decile_low_to_high": 1,
+          "n": 9061,
+          "mean_score": 0.1656773549150666,
+          "actual_default_rate": 0.036640547400949124
+        },
+        {
+          "decile_low_to_high": 2,
+          "n": 9061,
+          "mean_score": 0.29233747508601404,
+          "actual_default_rate": 0.06423132104624214
+        },
+        {
+          "decile_low_to_high": 3,
+          "n": 9062,
+          "mean_score": 0.36052540322563864,
+          "actual_default_rate": 0.09523284043257559
+        },
+        {
+          "decile_low_to_high": 4,
+          "n": 9061,
+          "mean_score": 0.37757903671775905,
+          "actual_default_rate": 0.08630393996247655
+        },
+        {
+          "decile_low_to_high": 5,
+          "n": 9062,
+          "mean_score": 0.4310148476948025,
+          "actual_default_rate": 0.12911057161774442
+        },
+        {
+          "decile_low_to_high": 6,
+          "n": 9061,
+          "mean_score": 0.5002654643425319,
+          "actual_default_rate": 0.1472243681712835
+        },
+        {
+          "decile_low_to_high": 7,
+          "n": 9062,
+          "mean_score": 0.5356187758672196,
+          "actual_default_rate": 0.1658574266166409
+        },
+        {
+          "decile_low_to_high": 8,
+          "n": 9061,
+          "mean_score": 0.5745468938013297,
+          "actual_default_rate": 0.19887429643527205
+        },
+        {
+          "decile_low_to_high": 9,
+          "n": 9062,
+          "mean_score": 0.6239082202420234,
+          "actual_default_rate": 0.21639814610461267
+        },
+        {
+          "decile_low_to_high": 10,
+          "n": 9062,
+          "mean_score": 0.6866076733771317,
+          "actual_default_rate": 0.27267711322003974
+        }
+      ]
+    },
+    "score_random_forest_g1_g2": {
+      "metrics_at_threshold": {
+        "roc_auc": 0.6831471328230418,
+        "pr_auc": 0.24784521414457938,
+        "f1": 0.3265957876864616,
+        "accuracy": 0.6323346024388898,
+        "precision": 0.22029230517532858,
+        "recall": 0.631171875,
+        "threshold": 0.5,
+        "confusion_matrix": [
+          [
+            49220,
+            28595
+          ],
+          [
+            4721,
+            8079
+          ]
+        ],
+        "positive_rate": 0.141256966285935,
+        "target_prevalence": 0.141256966285935,
+        "predicted_positive_rate": 0.40472327981018597,
+        "n": 90615
+      },
+      "by_issue_month": [
+        {
+          "month": "2014-07",
+          "n": 19941,
+          "prevalence": 0.13529913244070008,
+          "false_positives": 6641,
+          "false_negatives": 1008
+        },
+        {
+          "month": "2014-08",
+          "n": 13283,
+          "prevalence": 0.13483399834374765,
+          "false_positives": 4202,
+          "false_negatives": 665
+        },
+        {
+          "month": "2014-09",
+          "n": 7371,
+          "prevalence": 0.14163614163614163,
+          "false_positives": 2203,
+          "false_negatives": 409
+        },
+        {
+          "month": "2014-10",
+          "n": 26573,
+          "prevalence": 0.14909870921612162,
+          "false_positives": 8603,
+          "false_negatives": 1354
+        },
+        {
+          "month": "2014-11",
+          "n": 16573,
+          "prevalence": 0.1422796114161588,
+          "false_positives": 5060,
+          "false_negatives": 912
+        },
+        {
+          "month": "2014-12",
+          "n": 6874,
+          "prevalence": 0.13776549316264183,
+          "false_positives": 1886,
+          "false_negatives": 373
+        }
+      ],
+      "score_deciles": [
+        {
+          "decile_low_to_high": 1,
+          "n": 9061,
+          "mean_score": 0.21185714540121178,
+          "actual_default_rate": 0.02957730934775411
+        },
+        {
+          "decile_low_to_high": 2,
+          "n": 9061,
+          "mean_score": 0.2946197813707048,
+          "actual_default_rate": 0.05849244012802119
+        },
+        {
+          "decile_low_to_high": 3,
+          "n": 9062,
+          "mean_score": 0.35062344702776344,
+          "actual_default_rate": 0.07636283381152063
+        },
+        {
+          "decile_low_to_high": 4,
+          "n": 9061,
+          "mean_score": 0.39525776146764857,
+          "actual_default_rate": 0.10517602913585697
+        },
+        {
+          "decile_low_to_high": 5,
+          "n": 9062,
+          "mean_score": 0.43902693296972817,
+          "actual_default_rate": 0.11807548002648421
+        },
+        {
+          "decile_low_to_high": 6,
+          "n": 9061,
+          "mean_score": 0.48146306130680755,
+          "actual_default_rate": 0.14115439796931906
+        },
+        {
+          "decile_low_to_high": 7,
+          "n": 9062,
+          "mean_score": 0.5218869540463862,
+          "actual_default_rate": 0.16177444272787464
+        },
+        {
+          "decile_low_to_high": 8,
+          "n": 9061,
+          "mean_score": 0.5625606541943438,
+          "actual_default_rate": 0.20075046904315197
+        },
+        {
+          "decile_low_to_high": 9,
+          "n": 9062,
+          "mean_score": 0.6042453357183812,
+          "actual_default_rate": 0.2234606047230192
+        },
+        {
+          "decile_low_to_high": 10,
+          "n": 9062,
+          "mean_score": 0.660247476209968,
+          "actual_default_rate": 0.2977267711322004
+        }
+      ]
+    }
+  }
+}

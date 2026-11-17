@@ -1,0 +1,5 @@
+config_id,n_estimators,max_depth,min_samples_leaf,max_features,class_weight,inner_roc_auc,fit_and_score_seconds
+2,200,,100,sqrt,balanced_subsample,0.6673778493528774,7.1
+0,200,12.0,100,sqrt,balanced_subsample,0.6669310848590646,5.5
+1,200,12.0,300,sqrt,balanced_subsample,0.6653311892652253,4.5
+3,200,,300,sqrt,balanced_subsample,0.6653272872661065,4.6

@@ -1,27 +1,52 @@
-# Predicción de incumplimiento en préstamos P2P (Lending Club)
+# Predicción de incumplimiento en préstamos Lending Club — Grupo 9
 
-Repositorio correspondiente a la **Entrega Previa (Avance 1)** del proyecto final de Machine Learning (CS3061 - UTEC).
+Proyecto de Machine Learning (UTEC). Se predice si un préstamo **aceptado a 36 meses** acabará en Charged Off/Default (1) o Fully Paid (0). No es un sistema de aprobación.
 
-## Descripción general
-El objetivo de este avance es plantear el problema predictivo sobre un dataset real y complejo (Lending Club), demostrando control riguroso de *data leakage*, validación temporal, establecimiento de un baseline honesto y análisis exploratorio inicial. 
+## Estado
 
-Toda la fundamentación teórica, estructuración de variables, métricas y planificación se encuentra detallada en el archivo [proposal.md](proposal.md).
+Esta integración reúne la infraestructura de Valentino/Kris, el script y los resultados de árboles de Nicolás, y repara el módulo de árboles ausente. La entrega previa se conserva en proposal.md, notebooks/01_exploracion_inicial.ipynb y outputs/metrics_baseline.json. Sus métricas corresponden a otra cohorte: no comparar directamente con v4. Los resultados v4 son de validación; **test permanece reservado**. Leer reports/informe_final.md para resultados y pendientes.
 
-## Estructura del repositorio
-- `proposal.md`: Documento principal con la propuesta y alcance del proyecto (puntos 1 al 15).
-- `README.md`: Guía de inicio y reproducción del repositorio.
-- `requirements.txt`: Listado de dependencias técnicas de Python.
-- `notebooks/01_exploracion_inicial.ipynb`: Notebook unificado que contiene la ingesta, el análisis exploratorio (EDA), las visualizaciones, pruebas de leakage y la ejecución del baseline.
-- `reports/tabla_variables.csv`: Matriz de clasificación de atributos por grupos (G0, G1, G2, G3) para el control de fugas de datos.
-- `outputs/metrics_baseline.json`: Archivo con los resultados métricos cuantitativos del baseline y modelos de referencia.
+## Estructura
 
-## Instrucciones de reproducción
-1. El código de este avance se encuentra estructurado para ejecutarse íntegramente en **Google Colab**.
-2. Asegúrate de tener una cuenta activa en [Kaggle](https://www.kaggle.com/) y genera un token de API (`Account -> Create New API Token`), el cual descargará un archivo llamado `kaggle.json`.
-3. Abre el archivo `notebooks/01_exploracion_inicial.ipynb` en Google Colab.
-4. Ejecuta las celdas de forma secuencial. La primera celda habilitará un widget para subir tu archivo `kaggle.json`, automatizando la descarga del dataset oficial (`wordsforthewise/lending-club`) directamente al entorno de ejecución.
-5. El flujo de partición y modelado utiliza una semilla fija (`random_state=42`) para garantizar la total reproducibilidad de los resultados métricos obtenidos.
+| Ruta | Propósito |
+|---|---|
+| src/data.py, src/splits.py, src/features.py | Cohorte, particiones y lista blanca de variables |
+| src/train.py, src/models_tree.py, src/models_boosting.py, src/evaluate.py | Modelos, pipelines y evaluación |
+| scripts/ | Auditoría, preparación, entrenamiento y análisis de errores |
+| tests/ | Pruebas sintéticas de contratos y modelos |
+| notebooks/ | Exploración de entrega previa |
+| reports/, outputs/ | Decisiones, informe y resultados |
 
-## Referencias
-- Dataset: Lending Club Loan Data, vía Kaggle (`wordsforthewise/lending-club`).
-- Curso de Machine Learning, UTEC (2026).
+## Reproducción desde cero en PowerShell
+
+Desde la raíz del repositorio: descargar el [CSV de Lending Club](https://www.kaggle.com/datasets/wordsforthewise/lending-club) y colocarlo en data/raw/accepted_2007_to_2018Q4.csv.gz. No subir el CSV ni las credenciales. Los scripts procesan todo el archivo por fragmentos.
+
+~~~powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install pytest
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m scripts.audit_dataset
+.\.venv\Scripts\python.exe -m scripts.audit_cohort_detail
+.\.venv\Scripts\python.exe -m scripts.prepare_data --mode matured_36
+.\.venv\Scripts\python.exe -m scripts.freeze_splits
+.\.venv\Scripts\python.exe -m scripts.train_baseline_v4
+.\.venv\Scripts\python.exe -m scripts.train_trees_nicolas --with-g2
+.\.venv\Scripts\python.exe -m scripts.train_boosting_kris --n-iter 30 --with-gb
+.\.venv\Scripts\python.exe -m scripts.feature_importance_boosting_kris
+.\.venv\Scripts\python.exe -m scripts.analyze_errors
+.\.venv\Scripts\python.exe -m scripts.analyze_errors --valid data/splits/lc_36m_v4/valid.parquet
+.\.venv\Scripts\python.exe -m scripts.plot_validation
+~~~
+
+Entrenar todo puede tardar y requiere memoria/espacio suficientes. data/splits/lc_36m_v4/ contiene train/valid y contrato; nunca test.parquet. No se entrega un comando de test final porque falta fijar el modelo y el protocolo conjunto.
+
+## Contrato y comparación
+
+Train: 2007–junio 2014 (244 943); validación: julio–diciembre 2014 (90 615); test reservado: enero–junio 2015 (120 790). Solo préstamos de 36 meses con desenlace terminal bajo un corte 2018Q4 **supuesto**. La separación es por fecha de originación; el desenlace puede conocerse después, así que no es una simulación prospectiva estricta. Ver reports/contrato_dataset_v4.md.
+
+G1: 18 atributos de originación; G2: tasa, cuota y grado de Lending Club como experimento aparte; G3: variables posteriores prohibidas por fuga. Se ajusta cada transformación dentro del Pipeline con train. Se comparan Dummy, logística, árbol, bosque y boosting mediante ROC-AUC/PR-AUC. La prevalencia de impago en validación es 14.13 %.
+
+## Pendientes para una entrega final completa
+
+Fijar modelo y umbral; analizar errores por segmentos y casos problemáticos; abrir una sola vez el test reservado con protocolo temporal explícito; incorporar resultados al informe y revisar la presentación. El CSV original no está en Git: esta integración valida código y reproduce análisis de predicciones guardadas, pero no reentrena con los datos originales.
